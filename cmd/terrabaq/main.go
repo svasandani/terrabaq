@@ -17,11 +17,14 @@ func main() {
 	flag.Parse()
 
 	sessions := make(map[string]db.User)
+	usrtouuid := make(map[string]string)
 
-	api.SetupAPI(pukkalink, sessions)
+	api.SetupAPI(pukkalink, sessions, usrtouuid)
 
-	http.HandleFunc("/", api.SessionHandler)
-	http.HandleFunc("/enqueue", api.EnqueueHandler)
+	http.HandleFunc("/new_session", api.Middleware(api.SessionHandler))
+	http.HandleFunc("/enqueue", api.Middleware(api.EnqueueHandler))
+
+	http.HandleFunc("/update_roles", api.Middleware(api.UpdateHandler))
 
 	log.Fatal(http.ListenAndServe(":"+*port, nil))
 }

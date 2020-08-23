@@ -43,3 +43,9 @@ type EnqueueRequest struct {
 type EnqueueResponse struct {
 	User User `json:"user"`
 }
+
+// UpdateRequest - struct for getting a request to update user roles
+type UpdateRequest struct {
+	OldUser User `json:"old_user"`
+	NewUser User `json:"new_user"`
+}
