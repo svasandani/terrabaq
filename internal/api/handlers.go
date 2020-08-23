@@ -131,6 +131,22 @@ func SessionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if json, _ := json.Marshal(db.User{}); string(json) == string(usrstring) {
+		w.WriteHeader(http.StatusUnauthorized)
+
+		w.Write(nil)
+
+		return
+	}
+
+	if _, ok := usrtouuid[string(usrstring)]; ok {
+		w.WriteHeader(http.StatusUnauthorized)
+
+		w.Write(nil)
+
+		return
+	}
+
 	uuid := sessionToken(string(usrstring))
 
 	sessions[uuid] = carp.User
@@ -212,13 +228,13 @@ func UpdateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usrstring, err := json.Marshal(ur.OldUser)
+	oldusrstring, err := json.Marshal(ur.OldUser)
 
 	if ok = util.CheckHTTPError("error marshalling user", err, w); !ok {
 		return
 	}
 
-	uuid, ok := usrtouuid[string(usrstring)]
+	uuid, ok := usrtouuid[string(oldusrstring)]
 
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -228,14 +244,15 @@ func UpdateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usrstring, err = json.Marshal(ur.NewUser)
+	newusrstring, err := json.Marshal(ur.NewUser)
 
 	if ok = util.CheckHTTPError("error marshalling user", err, w); !ok {
 		return
 	}
 
 	sessions[uuid] = ur.NewUser
-	usrtouuid[string(usrstring)] = uuid
+	usrtouuid[string(newusrstring)] = uuid
+	usrtouuid[string(oldusrstring)] = ""
 
 	w.WriteHeader(http.StatusOK)
 
